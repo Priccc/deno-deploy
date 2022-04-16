@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Robot</title>
+  <style>
+    body {
+      margin: 0;
+    }
+    .main-body {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 10px;
+    }
+    .chat-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #aeaeae;
+    }
+    .chat-list .chat-item {
+      margin-top: 6px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      line-height: 20px;
+      font-size: 16px;
+    }
+    .chat-list .chat-item-user {
+      margin-right: 6px;
+      align-self: flex-end;
+      background-color: #95EC69;
+    }
+    .chat-list .chat-item-robot {
+      margin-left: 6px;
+      align-self: flex-start;
+      background-color: #F3F3F3;
+    }
+    .chat-input {
+      flex-shrink: 0;
+      height: 100px;
+      padding: 4px;
+      border: 1px solid #aeaeae;
+      border-top: none;
+      overflow: hidden;
+    }
+    .chat-input textarea {
+      height: 100%;
+      width: 100%;
+      outline: none;
+      resize: none;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-body">
+    <div id="chat-list" class="chat-list"></div>
+    <div class="chat-input">
+      <textarea id="chat-input" placeholder="输入聊天内容"></textarea>
+    </div>
+  </div>
+
+  <script>
+    const chatInput = document.querySelector("#chat-input");
+    const chatList = document.querySelector("#chat-list");
+    const createChatItem = function (type = 'user', message = '') {
+      const chatItem = document.createElement("div");
+
+      if (type === 'user') {
+        chatItem.classList = "chat-item chat-item-user";
+      } else {
+        chatItem.classList = "chat-item chat-item-robot";
+      }
+      chatItem.innerText = message;
+      
+      return chatItem;
+    };
+
+    document.onkeydown = function (event) {
+      // 如果是 Enter 事件
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const value = chatInput.value;
+        const chatItem = createChatItem("user", value);
+
+        chatList.appendChild(chatItem);
+        // 重置 Input Value
+        chatInput.value = '';
+
+        fetch(
+          "/chat/send",
+          {
+            method: "post",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: value }),
+          }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            const chatItem = createChatItem("robot", data.message);
+
+            chatList.appendChild(chatItem);
+          });
+      }
+    };
+  </script>
+</body>
+</html>
