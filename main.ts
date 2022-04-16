@@ -11,20 +11,21 @@ router
   })
   .post("/chat/send", async ({ response, request }) => {
     const result = request.body({ type: "json" });
-    const value = await result.value; 
-
-    response.body = JSON.stringify({
-      message: value.message.replace(/(吗|我|？|\?)/gi, (str: string) => {
-          if (/(吗|么)/.test(str)) {
-            return "";
-          } else if (/(？|\?)/.test(str)) {
-            return "！";
-          } else if (str === "我") {
-            return "你";
-          }
-      }),
+    const value = await result.value;
+    const message = value.message.replace(/(吗|我|？|\?)/gi, (str: string) => {
+      if (/(吗|么)/.test(str)) {
+        return "";
+      } else if (/(？|\?)/.test(str)) {
+        return "！";
+      } else if (str === "我") {
+        return "你";
+      }
     });
-  })
+    const time = Date.now();
+    const req = { message, time };
+
+    response.body = JSON.stringify(req);
+  });
 
 app.use(router.routes());
 app.use(router.allowedMethods());

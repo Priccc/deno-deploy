@@ -23,6 +23,7 @@
       border: 1px solid #aeaeae;
     }
     .chat-list .chat-item {
+      position: relative;
       margin-top: 6px;
       padding: 6px 10px;
       border-radius: 4px;
@@ -30,14 +31,42 @@
       font-size: 16px;
     }
     .chat-list .chat-item-user {
-      margin-right: 6px;
+      margin-right: 10px;
       align-self: flex-end;
       background-color: #95EC69;
     }
+    .chat-list .chat-item-user::before {
+      content: ' ';
+      position: absolute;
+      right: -12px;
+      top: 9px;
+      height: 0;
+      width: 0;
+      border: 6px solid transparent;
+      border-left: 6px solid #95EC69;
+    }
     .chat-list .chat-item-robot {
-      margin-left: 6px;
+      margin-left: 10px;
       align-self: flex-start;
       background-color: #F3F3F3;
+    }
+    .chat-list .chat-item-robot::before {
+      content: ' ';
+      position: absolute;
+      left: -12px;
+      top: 9px;
+      height: 0;
+      width: 0;
+      border: 6px solid transparent;
+      border-right: 6px solid #F3F3F3;
+    }
+    .chat-list .chat-time {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 14px;
+      color: #b1b1b1;
     }
     .chat-input {
       flex-shrink: 0;
@@ -68,16 +97,20 @@
     const chatInput = document.querySelector("#chat-input");
     const chatList = document.querySelector("#chat-list");
     const createChatItem = function (type = 'user', message = '') {
-      const chatItem = document.createElement("div");
+      const el = document.createElement("div");
 
       if (type === 'user') {
-        chatItem.classList = "chat-item chat-item-user";
-      } else {
-        chatItem.classList = "chat-item chat-item-robot";
+        el.classList = "chat-item chat-item-user";
       }
-      chatItem.innerText = message;
+      if (type === 'robot') {
+        el.classList = "chat-item chat-item-robot";
+      }
+      if (type === 'time') {
+        el.classList = "chat-time";
+      }
+      el.innerText = message;
       
-      return chatItem;
+      return el;
     };
 
     document.onkeydown = function (event) {
@@ -103,9 +136,13 @@
         )
           .then((res) => res.json())
           .then((data) => {
+            const serveTime = new Date(data.time);
+            const chatTimeText = `${serveTime.getHours()}:${serveTime.getMinutes()}`;
+            const chatTime = createChatItem("time", chatTimeText);
             const chatItem = createChatItem("robot", data.message);
 
             chatList.appendChild(chatItem);
+            chatList.appendChild(chatTime);
           });
       }
     };
